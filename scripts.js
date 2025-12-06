@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Этап 3: Откат с 99% до 0%
             updateProgress(0, 1000, () => { // Откат за 1 секунду
                 // Этап 4: Сообщение "Наебал" и скрытие
-                preloaderMessage.textContent = "НАЕБАЛ!";
+                preloaderMessage.textContent = "HAHHAAHHAAHAAHAHA!";
                 preloaderMessage.style.color = 'var(--cyber-pink)'; // Яркий цвет для "Наебал"
                 preloaderMessage.style.fontSize = '2.5em'; // Увеличим размер
                 preloaderMessage.style.textShadow = '0 0 20px var(--cyber-pink)';
@@ -229,4 +229,5 @@ function smoothScroll(targetId) {
             behavior: 'smooth'
         });
     }
+
 }
