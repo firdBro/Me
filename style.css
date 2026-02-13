@@ -7,7 +7,7 @@
     --bg-color: #1a1a2e; /* Темный фон */
     --card-bg-color: #2a2a4a; /* Фон для карточек */
     --border-color: #4a4a6e; /* Цвет границ */
-    --shadow-color: rgba(0, 0, 0, 0.4); /* Цвет тени */
+    --shadow-color: rgba(0, 0, 0, 0.4); /* Цвет теней */
     --font-main: 'Montserrat', sans-serif;
     --font-heading: 'Play', sans-serif;
     --transition-speed: 0.3s;
