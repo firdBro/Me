@@ -231,4 +231,3 @@ function smoothScroll(targetId) {
     }
 
 }
-
