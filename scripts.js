@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     const preloaderMessage = document.getElementById('preloaderMessage');
-    const mainContent = document.getElementById('mainContent'); // Получаем главный контент
+    const mainContent = document.getElementById('mainContent');
 
     let progress = 0;
 
@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const elapsedTime = Date.now() - startTime;
             const percentage = Math.min(1, elapsedTime / duration);
             progress = startProgress + (targetProgress - startProgress) * percentage;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${Math.floor(progress)}%`;
+            
+            if (progressBar) progressBar.style.width = `${progress}%`;
+            if (progressText) progressText.textContent = `${Math.floor(progress)}%`;
 
             if (percentage < 1) {
                 requestAnimationFrame(animate);
@@ -29,34 +30,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Этап 1: Достигаем 99%
-    updateProgress(99, 1500, () => { // Прогресс до 99% за 1.5 секунды
+    updateProgress(99, 1500, () => {
         // Этап 2: Висим на 99% 3 секунды
         setTimeout(() => {
-            preloaderMessage.textContent = "Почти готово... или нет?";
+            if (preloaderMessage) preloaderMessage.textContent = "Почти готово... или нет?";
             
-            // Запускаем тряску экрана
             if (mainContent) {
                 mainContent.classList.add('shake-active');
             }
 
             // Этап 3: Откат с 99% до 0%
-            updateProgress(0, 1000, () => { // Откат за 1 секунду
-                // Этап 4: Сообщение "Наебал" и скрытие
-                preloaderMessage.textContent = "HAHHAAHHAAHAAHAHA!";
-                preloaderMessage.style.color = 'var(--cyber-pink)'; // Яркий цвет для "Наебал"
-                preloaderMessage.style.fontSize = '2.5em'; // Увеличим размер
-                preloaderMessage.style.textShadow = '0 0 20px var(--cyber-pink)';
-                preloaderMessage.style.fontWeight = 'bold'; // Жирный текст
+            updateProgress(0, 1000, () => {
+                // Этап 4: Финальное сообщение
+                if (preloaderMessage) {
+                    preloaderMessage.textContent = "HAHHAAHHAAHAAHAHA!";
+                    preloaderMessage.style.color = 'var(--cyber-pink)';
+                    preloaderMessage.style.fontSize = '2.5em';
+                    preloaderMessage.style.textShadow = '0 0 20px var(--cyber-pink)';
+                    preloaderMessage.style.fontWeight = 'bold';
+                }
 
                 setTimeout(() => {
                     if (mainContent) {
-                        mainContent.classList.remove('shake-active'); // Останавливаем тряску
+                        mainContent.classList.remove('shake-active');
                     }
-                    preloader.classList.add('preloader-hidden');
-                    document.body.classList.remove('no-scroll'); // Разрешаем скролл после загрузки
-                }, 1000); // 1 секунда, чтобы прочитать "Наебал!"
+                    if (preloader) preloader.classList.add('preloader-hidden');
+                    document.body.classList.remove('no-scroll');
+                }, 1000);
             });
-        }, 3000); // Висим 3 секунды на 99%
+        }, 3000);
     });
 
     // --- 1. Бургер-меню для мобильных ---
@@ -65,11 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
 
     if (burgerMenu && mainNav) {
-        burgerMenu.addEventListener('click', () => {
+        const toggleMenu = () => {
             burgerMenu.classList.toggle('active');
             mainNav.classList.toggle('active');
             document.body.classList.toggle('no-scroll');
-        });
+        };
+
+        burgerMenu.addEventListener('click', toggleMenu);
 
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -83,13 +87,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 2. Плавный скролл по якорям ---
     document.querySelectorAll('a.nav-link, .cta-button').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-
             const targetId = this.getAttribute('href');
             if (targetId && targetId.startsWith('#')) {
+                e.preventDefault();
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
-                    const headerOffset = document.querySelector('.main-header').offsetHeight;
+                    const header = document.querySelector('.main-header');
+                    const headerOffset = header ? header.offsetHeight : 0;
                     const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
                     const offsetPosition = elementPosition - headerOffset;
 
@@ -104,13 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 3. Анимации при скролле (Intersection Observer) ---
     const animatedSections = document.querySelectorAll('.animated-section');
-
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
-
     const sectionObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -118,30 +115,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 observer.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.1 });
 
-    animatedSections.forEach(section => {
-        sectionObserver.observe(section);
-    });
+    animatedSections.forEach(section => sectionObserver.observe(section));
 
     // --- 4. Динамическая анимация иконок скиллов ---
     const skillSection = document.getElementById('skills');
-
     const skillObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                const skillCards = document.querySelectorAll('#skillsGrid .skill-card');
+                // ИСПРАВЛЕНО: используем класс .skills-grid вместо ID
+                const skillCards = document.querySelectorAll('.skills-grid .skill-card');
                 skillCards.forEach((card, index) => {
-                    card.querySelector('i').style.setProperty('--delay', `${index * 0.1}s`);
+                    const icon = card.querySelector('i');
+                    if (icon) icon.style.setProperty('--delay', `${index * 0.1}s`);
                 });
                 observer.unobserve(entry.target);
             }
         });
     }, { threshold: 0.2 });
 
-    if (skillSection) {
-        skillObserver.observe(skillSection);
-    }
+    if (skillSection) skillObserver.observe(skillSection);
 
     // --- 5. Модальное окно галереи ---
     const galleryItems = document.querySelectorAll('.gallery-item');
@@ -149,106 +143,74 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalImage = document.getElementById('modalImage');
     const closeButton = document.querySelector('.close-button');
 
-    function openGalleryModal(imageSrc) {
-        modal.style.display = 'block';
-        modalImage.src = imageSrc;
-        document.body.classList.add('no-scroll');
-    }
-
-    galleryItems.forEach(item => {
-        item.addEventListener('click', () => {
-            openGalleryModal(item.dataset.src);
-        });
-    });
-
-    if (closeButton) {
-        closeButton.addEventListener('click', () => {
-            modal.style.display = 'none';
-            document.body.classList.remove('no-scroll');
-        });
-    }
-
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                document.body.classList.remove('no-scroll');
-            }
-        });
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.style.display === 'block') {
-            modal.style.display = 'none';
-            document.body.classList.remove('no-scroll');
-        }
-    });
-
-    // --- 6. Динамический год и время в футере ---
-    const currentYearSpan = document.getElementById('currentYear');
-    const currentLocalTimeSpan = document.getElementById('currentLocalTime');
-    const currentLocalTimeSpan2 = document.getElementById('currentLocalTime2');
-
-    if (currentYearSpan) {
-        currentYearSpan.textContent = new Date().getFullYear();
-    }
-
-    if (currentLocalTimeSpan || currentLocalTimeSpan2) {
-        function updateLocalTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ru-RU', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                timeZone: 'Asia/Tashkent', // Часовой пояс для Ташкента/Ангрена
-                timeZoneName: 'short'
+    if (modal && modalImage) {
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                modal.style.display = 'block';
+                modalImage.src = item.dataset.src || item.querySelector('img').src;
+                document.body.classList.add('no-scroll');
             });
-            if (currentLocalTimeSpan) {
-                currentLocalTimeSpan.textContent = timeString;
-            }
-            if (currentLocalTimeSpan2) {
-                currentLocalTimeSpan2.textContent = timeString;
-            }
-        }
-        updateLocalTime();
-        setInterval(updateLocalTime, 1000);
+        });
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            document.body.classList.remove('no-scroll');
+        };
+
+        if (closeButton) closeButton.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
     }
 
+    // --- 6. Динамический год и время ---
+    const currentYearSpan = document.getElementById('currentYear');
+    const timeSpans = [document.getElementById('currentLocalTime'), document.getElementById('currentLocalTime2')];
+
+    if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+    function updateLocalTime() {
+        const timeString = new Date().toLocaleTimeString('ru-RU', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            timeZone: 'Asia/Tashkent', timeZoneName: 'short'
+        });
+        timeSpans.forEach(span => { if (span) span.textContent = timeString; });
+    }
+    updateLocalTime();
+    setInterval(updateLocalTime, 1000);
+
+    // --- 7. Кастомный курсор (Логика движения внутри DOMContentLoaded) ---
+    const cursor = document.querySelector('.cursor');
+    const follower = document.querySelector('.cursor-follower');
+
+    if (cursor && follower) {
+        document.addEventListener('mousemove', (e) => {
+            // Используем requestAnimationFrame для максимальной плавности
+            requestAnimationFrame(() => {
+                cursor.style.left = `${e.clientX}px`;
+                cursor.style.top = `${e.clientY}px`;
+                follower.style.left = `${e.clientX}px`;
+                follower.style.top = `${e.clientY}px`;
+            });
+        });
+
+        // Элементы, на которые реагирует курсор
+        const interactiveElements = document.querySelectorAll('a, button, .gallery-item, .social-icon-item');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => follower.classList.add('cursor-active'));
+            el.addEventListener('mouseleave', () => follower.classList.remove('cursor-active'));
+        });
+    }
 });
 
-// Функция для плавного скролла (если вызывается из HTML)
+// Глобальная функция (если нужна в HTML)
 function smoothScroll(targetId) {
     const targetElement = document.querySelector(targetId);
     if (targetElement) {
-        const headerOffset = document.querySelector('.main-header').offsetHeight;
-        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - headerOffset;
-
+        const header = document.querySelector('.main-header');
+        const offset = header ? header.offsetHeight : 0;
         window.scrollTo({
-            top: offsetPosition,
+            top: targetElement.getBoundingClientRect().top + window.pageYOffset - offset,
             behavior: 'smooth'
         });
     }
-
 }
-const links = document.querySelectorAll('a, button');
-
-links.forEach(link => {
-    link.addEventListener('mouseenter', () => {
-        follower.classList.add('cursor-active');
-    });
-    link.addEventListener('mouseleave', () => {
-        follower.classList.remove('cursor-active');
-    });
-});
-const links = document.querySelectorAll('a, button');
-
-links.forEach(link => {
-    link.addEventListener('mouseenter', () => {
-        follower.classList.add('cursor-active');
-    });
-    link.addEventListener('mouseleave', () => {
-        follower.classList.remove('cursor-active');
-    });
-});
-
