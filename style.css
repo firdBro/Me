@@ -1818,20 +1818,3 @@ body.no-scroll {
         font-size: 2em;
     }
 }
-
-/* Прячем стандартный курсор везде */
-body {
-    cursor: none;
-}
-
-/* Основная точка */
-.cursor {
-    width: 8px;
-    height: 8px;
-    background-color: #fff; /* Выбери свой акцентный цвет */
-    border-radius: 50%;
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-}
