@@ -231,3 +231,24 @@ function smoothScroll(targetId) {
     }
 
 }
+const links = document.querySelectorAll('a, button');
+
+links.forEach(link => {
+    link.addEventListener('mouseenter', () => {
+        follower.classList.add('cursor-active');
+    });
+    link.addEventListener('mouseleave', () => {
+        follower.classList.remove('cursor-active');
+    });
+});
+const links = document.querySelectorAll('a, button');
+
+links.forEach(link => {
+    link.addEventListener('mouseenter', () => {
+        follower.classList.add('cursor-active');
+    });
+    link.addEventListener('mouseleave', () => {
+        follower.classList.remove('cursor-active');
+    });
+});
+
